@@ -462,7 +462,7 @@
                     <autoVersionSubmodules>true</autoVersionSubmodules>
                     <releaseProfiles>ci-build,release</releaseProfiles>
                     <checkModificationExcludes>
-                        <checkModificationExclude>dependency-reduced-pom.xml</checkModificationExclude>
+                        <checkModificationExclude>**/dependency-reduced-pom.xml</checkModificationExclude>
                     </checkModificationExcludes>
                 </configuration>
             </plugin>
