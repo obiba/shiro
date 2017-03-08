@@ -460,6 +460,10 @@
                 <version>2.5.2</version>
                 <configuration>
                     <autoVersionSubmodules>true</autoVersionSubmodules>
+                    <releaseProfiles>ci-build,release</releaseProfiles>
+                    <checkModificationExcludes>
+                        <checkModificationExclude>dependency-reduced-pom.xml</checkModificationExclude>
+                    </checkModificationExcludes>
                 </configuration>
             </plugin>
         </plugins>
