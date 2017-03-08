@@ -55,14 +55,6 @@
         <url>http://hudson.zones.apache.org/hudson/view/Shiro/</url>
     </ciManagement>
 
-    <distributionManagement>
-        <site>
-            <id>shiro.website</id>
-            <name>Apache Shiro Site</name>
-            <url>scm:svn:https://svn.apache.org/repos/asf/shiro/site/publish/static/latest</url>
-        </site>
-    </distributionManagement>
-
     <properties>
 
         <!-- Replaced by the build number plugin at build time: -->
@@ -84,7 +76,7 @@
         <!-- Don't change this version without also changing the shiro-hazelcast and shiro-features OSGi metadata: -->
         <hazelcast.version>2.4.1</hazelcast.version>
         <hsqldb.version>1.8.0.7</hsqldb.version>
-        <jdk.version>1.6</jdk.version>
+        <jdk.version>1.8</jdk.version>
         <jetty.version>6.1.26</jetty.version>
         <!-- Don't change this version without also changing the shiro-quartz and shiro-features
              modules' OSGi metadata: -->
@@ -449,31 +441,41 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-release-plugin</artifactId>
                 <configuration>
-                    <!-- do not update upstream, with a pending release. -->
-                    <pushChanges>false</pushChanges>
-                    <localCheckout>true</localCheckout>
-                    <!-- "install" needed because we have interrelated dependencies between the modules and we are releasing them all the same - especially consider shiro-all -->
-                    <preparationGoals>clean apache-rat:check install</preparationGoals>
                     <autoVersionSubmodules>true</autoVersionSubmodules>
-                    <!-- This configuration copied from apache:apache:7 parent pom -->
-                    <useReleaseProfile>false</useReleaseProfile>
-                    <goals>deploy site site:stage</goals>
-                    <arguments>-Pdocs,apache-release</arguments>
-                    <mavenExecutorId>forked-path</mavenExecutorId>
-                </configuration>
-            </plugin>
-            <plugin>
-                <groupId>org.sonatype.plugins</groupId>
-                <artifactId>nexus-staging-maven-plugin</artifactId>
-                <version>1.6</version>
-                <extensions>true</extensions>
-                <configuration>
-                    <nexusUrl>https://repository.apache.org</nexusUrl>
-                    <serverId>apache.releases.https</serverId>
                 </configuration>
             </plugin>
         </plugins>
     </build>
+
+    <repositories>
+
+        <repository>
+            <id>obiba.org</id>
+            <name>Obiba Maven 2.x Repository</name>
+            <url>http://repo.obiba.org/repo</url>
+            <releases>
+                <enabled>true</enabled>
+            </releases>
+            <snapshots>
+                <enabled>true</enabled>
+            </snapshots>
+        </repository>
+
+    </repositories>
+
+    <distributionManagement>
+
+        <repository>
+            <id>obiba-releases</id>
+            <url>http://repo.obiba.org/libs-release-local</url>
+        </repository>
+
+        <snapshotRepository>
+            <id>obiba-snapshots</id>
+            <url>http://repo.obiba.org/libs-snapshot-local</url>
+        </snapshotRepository>
+
+    </distributionManagement>
 
     <dependencies>
         <!-- Automatically inherited dependencies.  The only ones that should be in here
@@ -874,208 +876,28 @@
             </dependency>
         </dependencies>
     </dependencyManagement>
-    
-    <!-- Note that reporting may fail with lower settings than something like: MAVEN_OPTS="-X512m -XX:MaxPermSize=128m" -->
-    <reporting>
-        <plugins>
-            <plugin>
-                <artifactId>maven-javadoc-plugin</artifactId>
-                <version>2.7</version>
-                <configuration>
-                    <source>${jdk.version}</source>
-                    <encoding>${project.build.sourceEncoding}</encoding>
-                    <linksource>true</linksource>
-                    <links>
-                        <link>http://java.sun.com/javase/6/docs/api/</link>
-                        <link>http://java.sun.com/javaee/5/docs/api/</link>
-                        <link>http://www.slf4j.org/api/</link>
-                        <link>http://static.springframework.org/spring/docs/2.5.x/api/</link>
-                        <link>http://junit.org/junit/javadoc/4.4/</link>
-                        <link>http://easymock.org/api/easymock/2.4</link>
-                        <link>http://www.quartz-scheduler.org/docs/api/1.8.0/</link>
-                    </links>
-                    <!-- Don't include the sample apps - they're not part of Shiro's API: -->
-                    <excludePackageNames>org.apache.shiro.samples.*</excludePackageNames>
-                    <top><![CDATA[
-  <!-- Begin Google Analytics code -->
-  <script type="text/javascript">
-      var _gaq = _gaq || [];
-      _gaq.push(['_setAccount', 'UA-11551827-1']);
-      _gaq.push(['_trackPageview']);
-
-      (function() {
-        var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
-        ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
-        var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
-      })();
-  </script>
-  <!-- End Google Analytics code -->
-                    ]]></top>
-                </configuration>
-                <reportSets>
-                    <reportSet>
-                        <id>javadoc-aggregate</id>
-                        <reports>
-                            <report>aggregate</report>
-                        </reports>
-                    </reportSet>
-                </reportSets>
-            </plugin>
-            <plugin>
-                <artifactId>maven-jxr-plugin</artifactId>
-                <version>2.1</version>
-                <configuration>
-                    <aggregate>true</aggregate>
-                </configuration>
-            </plugin>
-            <plugin>
-                <artifactId>maven-pmd-plugin</artifactId>
-                <version>2.5</version>
-                <configuration>
-                    <sourceEncoding>utf-8</sourceEncoding>
-                    <targetJdk>1.5</targetJdk>
-                </configuration>
-            </plugin>
-            <plugin>
-                <artifactId>maven-project-info-reports-plugin</artifactId>
-                <version>2.2</version>
-                <!-- Disable, just to make it go faster -->
-                <configuration>
-                    <dependencyLocationsEnabled>false</dependencyLocationsEnabled>
-                </configuration>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.rat</groupId>
-                <artifactId>apache-rat-plugin</artifactId>
-                <version>0.11</version>
-                <!-- only run at the root -->
-                <inherited>false</inherited>
-                <configuration>
-                		<!-- note that this configuration needs to be maintain both in pluginManagement and reporting sections -->
-                    <excludes>
-                        <exclude>**/.externalToolBuilders/*</exclude>
-                        <exclude>**/infinitest.filters</exclude>
-                        <!-- Apparently some test in samples/spring-client generates velocity log - would better to reconfigure to output to target/ -->
-                        <exclude>velocity.log</exclude>
-                    </excludes>
-                </configuration>
-            </plugin>
-            <plugin>
-                <artifactId>maven-surefire-report-plugin</artifactId>
-                <version>2.5</version>
-            </plugin>
-            <plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>taglist-maven-plugin</artifactId>
-                <version>2.4</version>
-                <configuration>
-                    <tagListOptions>
-                        <tagClasses>
-                            <tagClass>
-                                <displayName>Todo Work</displayName>
-                                <tags>
-                                    <tag>
-                                        <matchString>todo</matchString>
-                                        <matchType>ignoreCase</matchType>
-                                    </tag>
-                                    <tag>
-                                        <matchString>FIXME</matchString>
-                                        <matchType>exact</matchType>
-                                    </tag>
-                                </tags>
-                            </tagClass>
-                            <tagClass>
-                                <displayName>Deprecated</displayName>
-                                <tags>
-                                    <tag>
-                                        <matchString>@Deprecated</matchString>
-                                        <matchType>exact</matchType>
-                                    </tag>
-                                </tags>
-                            </tagClass>
-                        </tagClasses>
-                    </tagListOptions>
-                </configuration>
-            </plugin>
-            <plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>jdepend-maven-plugin</artifactId>
-                <version>2.0-beta-2</version>
-            </plugin>
-            <plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>dashboard-maven-plugin</artifactId>
-                <version>1.0.0-beta-1</version>
-            </plugin>
-            <plugin>
-                <groupId>org.jacoco</groupId>
-                <artifactId>jacoco-maven-plugin</artifactId>
-                <reportSets>
-                    <reportSet>
-                        <id>javadoc-aggregate</id>
-                        <reports>
-                            <report>report</report>
-                        </reports>
-                    </reportSet>
-                </reportSets>
-            </plugin>
-        </plugins>
-    </reporting>
 
     <profiles>
         <profile>
-            <id>jdk8</id>
-            <activation>
-                <jdk>[1.8,)</jdk>
-            </activation>
-            <properties>
-                <!-- Needed for the javadoc plugin when using JDK 1.8 -->
-                <additionalparam>-Xdoclint:none</additionalparam>
-            </properties>
-        </profile>
-        <profile>
-            <id>docs</id>
+            <id>release</id>
             <build>
                 <plugins>
                     <plugin>
-                        <groupId>org.apache.maven.plugins</groupId>
-                        <artifactId>maven-javadoc-plugin</artifactId>
-                        <version>2.7</version>
+                        <!-- Deploy javadoc and sources: explicitly define maven-deploy-plugin after other to force exec order -->
+                        <artifactId>maven-deploy-plugin</artifactId>
                         <executions>
                             <execution>
-                                <id>attach-api-docs</id>
+                                <id>deploy</id>
+                                <phase>deploy</phase>
                                 <goals>
-                                    <goal>jar</goal>
+                                    <goal>deploy</goal>
                                 </goals>
                             </execution>
                         </executions>
-                        <inherited>true</inherited>
-                    </plugin>
-                    <plugin>
-                        <groupId>org.apache.maven.plugins</groupId>
-                        <artifactId>maven-source-plugin</artifactId>
-                        <executions>
-                            <execution>
-                                <id>attach-sources</id>
-                                <goals>
-                                    <goal>jar</goal>
-                                </goals>
-                            </execution>
-                        </executions>
-                        <inherited>true</inherited>
                     </plugin>
                 </plugins>
             </build>
         </profile>
-        <profile>
-            <id>apache-release</id>
-            <distributionManagement>
-                <site>
-                    <id>shiro.website</id>
-                    <name>Apache Shiro Site</name>
-                    <url>scm:svn:https://svn.apache.org/repos/asf/shiro/site/publish/static/${project.version}</url>
-                </site>
-            </distributionManagement>
-        </profile>
     </profiles>
+
 </project>
